@@ -3,7 +3,8 @@ import tensorflow as tf
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 import os
 import zipfile
-import joblib
+import absl.logging
+absl.logging.set_verbosity(absl.logging.ERROR)
 
 local_zip = 'messy-vs-clean-room.zip'
 zip_ref = zipfile.ZipFile(local_zip, 'r')
@@ -79,9 +80,17 @@ model.fit(
     verbose=2
 )
 
-# serialize model to JSON
-model_json = model.to_json()
-with open("model.json", "w") as json_file:
-    json_file.write(model_json)
-# serialize weights to HDF5
-model.save_weights("model.h5")
+# save model
+version = 1
+export_path = 'trained_model'
+print('export_path = {}\n'.format(export_path))
+
+tf.keras.models.save_model(
+    model,
+    export_path,
+    overwrite=True,
+    include_optimizer=True,
+    save_format=None,
+    signatures=None,
+    options=None
+)
